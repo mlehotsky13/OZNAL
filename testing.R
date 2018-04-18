@@ -77,7 +77,20 @@ vc_p <- tm_map(vc_p, stripWhitespace)
 remove(allDocs, cgi, docsOfFile, files, i, ls, topic, cgiDt, lsDt, topicDt, vc, vs)
 
 # get subset corpus of train documents
-#vc_p1000 <- tm_filter(vc_p, FUN = function(x){meta(x)[["lewissplit"]] == "TRAIN"})
+vc_p_train <- tm_filter(vc_p, FUN = function(x){meta(x)[["lewissplit"]] == "TRAIN"})
+vc_p_test <- tm_filter(vc_p, FUN = function(x){meta(x)[["lewissplit"]] == "TEST"})
+
+# create Term Document Matrices
+tdm_train <- TermDocumentMatrix(vc_p_train)
+tdm_tfidf_train <- weightTfIdf(tdm_train)
+tdm_test <- TermDocumentMatrix(vc_p_test)
+tdm_tfidf_test <- weightTfIdf(tdm_test)
+
+# create data frames
+df_train <- as.data.frame(inspect(tdm_train))
+df_tfidf_train <- as.data.frame(inspect(tdm_tfidf_train))
+df_test <- as.data.frame(inspect(tdm_test))
+df_tfidf_test <- as.data.frame(inspect(tdm_tfidf_test))
 
 # creating Term Document Matrix
 #tdm <- TermDocumentMatrix(vc_p1000)[, 1:10]
