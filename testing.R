@@ -100,8 +100,8 @@ corpus <- Corpus(sourceData)
 dtm <- DocumentTermMatrix(corpus)
 weightedDtm <- weightTfIdf(dtm)
 
-#dtm <- removeSparseTerms(dtm, 0.9)
-#weightedDtm <- removeSparseTerms(weightedDtm, 0.9)
+dtm <- removeSparseTerms(dtm, 0.9)
+weightedDtm <- removeSparseTerms(weightedDtm, 0.9)
 
 dataframeDtm <- data.frame(as.matrix(dtm))
 dataframeWeightedDtm <- data.frame(as.matrix(weightedDtm))
