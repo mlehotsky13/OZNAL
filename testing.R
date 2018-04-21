@@ -120,10 +120,10 @@ dataframeWeightedDtmTrain$topic <- dataframe$topic[which(dataframe$train_test ==
 dataframeWeightedDtmTest$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
 
 # select subset of dataframes
-dataframeWeightedDtmTrain <- dataframeWeightedDtmTrain[1:200,]
-dataframeWeightedDtmTest <- dataframeWeightedDtmTest[1:80,]
-dataframeDtmTrain <- dataframeDtmTrain[1:200,]
-dataframeDtmTest <- dataframeDtmTest[1:80,]
+dataframeWeightedDtmTrain <- dataframeWeightedDtmTrain[1:1000,]
+dataframeWeightedDtmTest <- dataframeWeightedDtmTest[1:400,]
+dataframeDtmTrain <- dataframeDtmTrain[1:1000,]
+dataframeDtmTest <- dataframeDtmTest[1:400,]
 
 #KNN
 ctrl <- trainControl(method="repeatedcv",number = 10, repeats = 3)
