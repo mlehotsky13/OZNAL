@@ -96,8 +96,8 @@ corpus <- Corpus(sourceData)
 dtm <- DocumentTermMatrix(corpus)
 weightedDtm <- weightTfIdf(dtm)
 
-dtm <- removeSparseTerms(dtm, 0.98)
-weightedDtm <- removeSparseTerms(weightedDtm, 0.98)
+dtm <- removeSparseTerms(dtm, 0.99)
+weightedDtm <- removeSparseTerms(weightedDtm, 0.99)
 
 dataframeDtm <- data.frame(as.matrix(dtm))
 dataframeWeightedDtm <- data.frame(as.matrix(weightedDtm))
@@ -112,9 +112,11 @@ dataframeDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")
 dataframeWeightedDtm_train$topic <- dataframe$topic[which(dataframe$train_test == "TRAIN")]
 dataframeWeightedDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
 
+dataframeWeightedDtm_train <- dataframeWeightedDtm_train[1:2000,]
+dataframeWeightedDtm_test <- dataframeWeightedDtm_test[1:800,]
 
 #KNN
-ctrl <- trainControl(method="repeatedcv",number = 10, repeats = 1)
+ctrl <- trainControl(method="repeatedcv",number = 10, repeats = 3)
 
 set.seed(100)
 knn.tfidf <- train(topic ~ ., data = dataframeWeightedDtm_train, method = "knn", trControl = ctrl)
