@@ -141,4 +141,15 @@ svm.tfidf.radial.predict <- predict(svm.tfidf.radial,newdata = dataframeWeighted
 svm.tfidf.linear
 svm.tfidf.radial
 
+
+# Decision Tree
+ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
+
+set.seed(100)
+tree.tfidf  <- train(topic ~ . , data = dataframeWeightedDtm_train, method = "rpart", trControl = ctrl )
+
+tree.tfidf.predict <- predict(tree.tfidf,newdata = dataframeWeightedDtm_train)
+
+tree.tfidf
+
 #SAMOSTATNY MODEL pre kazdy TOPIC, dokument ho ma alebo nema
