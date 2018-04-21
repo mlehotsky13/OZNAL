@@ -120,10 +120,10 @@ dataframeWeightedDtmTrain$topic <- dataframe$topic[which(dataframe$train_test ==
 dataframeWeightedDtmTest$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
 
 # select subset of dataframes
-dataframeWeightedDtmTrain <- dataframeWeightedDtmTrain[1:1000,]
-dataframeWeightedDtmTest <- dataframeWeightedDtmTest[1:400,]
-dataframeDtmTrain <- dataframeDtmTrain[1:1000,]
-dataframeDtmTest <- dataframeDtmTest[1:400,]
+dataframeWeightedDtmTrain <- dataframeWeightedDtmTrain[1:200,]
+dataframeWeightedDtmTest <- dataframeWeightedDtmTest[1:80,]
+dataframeDtmTrain <- dataframeDtmTrain[1:200,]
+dataframeDtmTest <- dataframeDtmTest[1:80,]
 
 #KNN
 ctrl <- trainControl(method="repeatedcv",number = 10, repeats = 3)
@@ -169,5 +169,18 @@ treeTfidfPredict <- predict(treeTfidf, newdata = dataframeWeightedDtmTrain)
 
 treeTf
 treeTfidf
+
+
+# Neural Network
+ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
+
+neuralNetTf  <- train(topic ~ . , data = dataframeDtmTrain, method = "dnn", trControl = ctrl )
+neuralNetTfidf  <- train(topic ~ . , data = dataframeWeightedDtmTrain, method = "dnn", trControl = ctrl )
+
+neuralNetTfPredict <- predict(neuralNetTf, newdata = dataframeWeightedDtmTrain)
+neuralNetTfidfPredict <- predict(neuralNetTfidf, newdata = dataframeWeightedDtmTrain)
+
+neuralNetTf
+neuralNetTfIdf
 
 #SAMOSTATNY MODEL pre kazdy TOPIC, dokument ho ma alebo nema
