@@ -21,7 +21,7 @@ processFile <- function(filepath) {
   return(resultVector)
 }
 
-# going through every .sgm file in given directory
+# going through every .sgm file in give-n directory
 files <- list.files(path="Dataset/reuters21578/test", pattern="*.sgm", full.names=T, recursive=FALSE)
 allDocs <- c()
 for (i in 1:length(files)){
@@ -64,92 +64,110 @@ cgi <- unlist(cgi, use.names=FALSE)
 cgiDt <- as.data.frame(table(cgi))
 
 # PREPROCESSING of text contents
-vc_p <- vc
+vcProcessed <- vc
 # transform content of documents to lower case
-vc_p <- tm_map(vc_p, content_transformer(tolower))
+vcProcessed <- tm_map(vcProcessed, content_transformer(tolower))
 # transform content of documents by removal of numbers
-vc_p <- tm_map(vc_p, removeNumbers)
+vcProcessed <- tm_map(vcProcessed, removeNumbers)
 # transform content of documents by removal of punctuation
-vc_p <- tm_map(vc_p, removePunctuation)
+vcProcessed <- tm_map(vcProcessed, removePunctuation)
 # transform content of documents by removal of stopwords
-vc_p <- tm_map(vc_p, removeWords, stopwords("en"))
+vcProcessed <- tm_map(vcProcessed, removeWords, stopwords("en"))
 # remove word 'reuter' at the end of content
-vc_p <- tm_map(vc_p, removeWords, c("reuter"))
+vcProcessed <- tm_map(vcProcessed, removeWords, c("reuter"))
 # transform content of documents by removal of multispaces
-vc_p <- tm_map(vc_p, stripWhitespace)
+vcProcessed <- tm_map(vcProcessed, stripWhitespace)
 
 # remove unused structures
 remove(allDocs, cgi, docsOfFile, files, i, ls, topic, cgiDt, lsDt, topicDt, vc, vs)
 
-wanted_topics <- list("earn", "acq", "money-fx", "crude", "grain")
-wanted <- tm_filter(vc_p, FUN = function(x){length(meta(x)[["topics_cat"]]) == 1})
-wanted <- tm_filter(wanted, FUN = function(x){any(meta(x)[["topics_cat"]] %in% wanted_topics)})
+# filter documents with wanted topics
+wantedTopics <- list("earn", "acq", "money-fx", "crude", "grain")
+wanted <- tm_filter(vcProcessed, FUN = function(x){length(meta(x)[["topics_cat"]]) == 1})
+wanted <- tm_filter(wanted, FUN = function(x){any(meta(x)[["topics_cat"]] %in% wantedTopics)})
 wanted <- tm_filter(wanted, FUN = function(x){meta(x)[["lewissplit"]] %in% c("TRAIN", "TEST")})
 
+# create dataframe with text contents, topic and indication of presence in train or test set
 dataframe <- data.frame(text=unlist(sapply(wanted, `[`, "content")),
                         topic=unlist(sapply(wanted, meta, "topics_cat")),
                         train_test=(sapply(wanted, meta, "lewissplit")),
                         stringsAsFactors=F)
 
+# create Document Term Matrix for tf and tf-idf
 sourceData <- VectorSource(dataframe$text)
 corpus <- Corpus(sourceData)
 dtm <- DocumentTermMatrix(corpus)
 weightedDtm <- weightTfIdf(dtm)
 
-dtm <- removeSparseTerms(dtm, 0.99)
-weightedDtm <- removeSparseTerms(weightedDtm, 0.99)
+# remove sparse terms
+dtm <- removeSparseTerms(dtm, 0.97)
+weightedDtm <- removeSparseTerms(weightedDtm, 0.97)
 
+# Document Term Matrix to dataframe conversion
 dataframeDtm <- data.frame(as.matrix(dtm))
 dataframeWeightedDtm <- data.frame(as.matrix(weightedDtm))
 
-dataframeDtm_train <- dataframeDtm[which(dataframe$train_test == "TRAIN"),]
-dataframeDtm_test <- dataframeDtm[which(dataframe$train_test == "TEST"),]
-dataframeWeightedDtm_train <- dataframeWeightedDtm[which(dataframe$train_test == "TRAIN"),]
-dataframeWeightedDtm_test <- dataframeWeightedDtm[which(dataframe$train_test == "TEST"),]
+# split to train/test data frames
+dataframeDtmTrain <- dataframeDtm[which(dataframe$train_test == "TRAIN"),]
+dataframeDtmTest <- dataframeDtm[which(dataframe$train_test == "TEST"),]
+dataframeWeightedDtmTrain <- dataframeWeightedDtm[which(dataframe$train_test == "TRAIN"),]
+dataframeWeightedDtmTest <- dataframeWeightedDtm[which(dataframe$train_test == "TEST"),]
 
-dataframeDtm_train$topic <- dataframe$topic[which(dataframe$train_test == "TRAIN")]
-dataframeDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
-dataframeWeightedDtm_train$topic <- dataframe$topic[which(dataframe$train_test == "TRAIN")]
-dataframeWeightedDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
+# set topic column for data frames
+dataframeDtmTrain$topic <- dataframe$topic[which(dataframe$train_test == "TRAIN")]
+dataframeDtmTest$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
+dataframeWeightedDtmTrain$topic <- dataframe$topic[which(dataframe$train_test == "TRAIN")]
+dataframeWeightedDtmTest$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
 
-dataframeWeightedDtm_train <- dataframeWeightedDtm_train[1:2000,]
-dataframeWeightedDtm_test <- dataframeWeightedDtm_test[1:800,]
+# select subset of dataframes
+dataframeWeightedDtmTrain <- dataframeWeightedDtmTrain[1:200,]
+dataframeWeightedDtmTest <- dataframeWeightedDtmTest[1:80,]
+dataframeDtmTrain <- dataframeDtmTrain[1:200,]
+dataframeDtmTest <- dataframeDtmTest[1:80,]
 
 #KNN
 ctrl <- trainControl(method="repeatedcv",number = 10, repeats = 3)
 
-set.seed(100)
-knn.tfidf <- train(topic ~ ., data = dataframeWeightedDtm_train, method = "knn", trControl = ctrl)
+knnTf <- train(topic ~ ., data = dataframeDtmTrain, method = "knn", trControl = ctrl)
+knnTfidf <- train(topic ~ ., data = dataframeWeightedDtmTrain, method = "knn", trControl = ctrl)
 
-knn.tfidf.predict <- predict(knn.tfidf, newdata = dataframeWeightedDtm_test)
+knnPredict <- predict(knnTf, newdata = dataframeDtmTest)
+knnTfidfPredict <- predict(knnTfidf, newdata = dataframeWeightedDtmTest)
 
-knn.tfidf
+knnTf
+knnTfidf
 
 
 # SVM
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 
-set.seed(100)
-svm.tfidf.linear  <- train(topic ~ . , data=dataframeWeightedDtm_train, trControl = ctrl, method = "svmLinear")
+svmTfLinear  <- train(topic ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "svmLinear")
+svmTfidfLinear  <- train(topic ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "svmLinear")
 
-set.seed(100)
-svm.tfidf.radial  <- train(topic ~ . , data=dataframeWeightedDtm_train, trControl = ctrl, method = "svmRadial")
+svmTfRadial  <- train(topic ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "svmRadial")
+svmTfidfRadial  <- train(topic ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "svmRadial")
 
-svm.tfidf.linear.predict <- predict(svm.tfidf.linear,newdata = dataframeWeightedDtm_test)
-svm.tfidf.radial.predict <- predict(svm.tfidf.radial,newdata = dataframeWeightedDtm_test)
+svmTfLinearPredict <- predict(svmTfLinear, newdata = dataframeDtmTest)
+svmTfidfLinearPredict <- predict(svmTfidfLinear, newdata = dataframeWeightedDtmTest)
+svmTfRadialPredict <- predict(svmTfRadial, newdata = dataframeDtmTest)
+svmTfidfRadialPredict <- predict(svmTfidfRadial, newdata = dataframeWeightedDtmTest)
 
-svm.tfidf.linear
-svm.tfidf.radial
+svmTfLinear
+svmTfidfLinear
+svmTfRadial
+svmTfidfRadial
 
 
 # Decision Tree
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 
-set.seed(100)
-tree.tfidf  <- train(topic ~ . , data = dataframeWeightedDtm_train, method = "rpart", trControl = ctrl )
+treeTf  <- train(topic ~ . , data = dataframeDtmTrain, method = "rpart", trControl = ctrl )
+treeTfidf  <- train(topic ~ . , data = dataframeWeightedDtmTrain, method = "rpart", trControl = ctrl )
 
-tree.tfidf.predict <- predict(tree.tfidf,newdata = dataframeWeightedDtm_train)
+treeTfPredict <- predict(treeTf, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredict <- predict(treeTfidf, newdata = dataframeWeightedDtmTrain)
 
-tree.tfidf
+treeTf
+treeTfidf
 
 #SAMOSTATNY MODEL pre kazdy TOPIC, dokument ho ma alebo nema
