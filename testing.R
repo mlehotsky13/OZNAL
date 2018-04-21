@@ -113,6 +113,17 @@ dataframeWeightedDtm_train$topic <- dataframe$topic[which(dataframe$train_test =
 dataframeWeightedDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
 
 
+#KNN
+ctrl <- trainControl(method="repeatedcv",number = 10, repeats = 1)
+
+set.seed(100)
+knn.tfidf <- train(topic ~ ., data = dataframeWeightedDtm_train, method = "knn", trControl = ctrl)
+
+knn.tfidf.predict <- predict(knn.tfidf, newdata = dataframeWeightedDtm_test)
+
+knn.tfidf
+
+
 # SVM
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 
