@@ -100,8 +100,8 @@ corpus <- Corpus(sourceData)
 dtm <- DocumentTermMatrix(corpus)
 weightedDtm <- weightTfIdf(dtm)
 
-dtm <- removeSparseTerms(dtm, 0.9)
-weightedDtm <- removeSparseTerms(weightedDtm, 0.9)
+#dtm <- removeSparseTerms(dtm, 0.9)
+#weightedDtm <- removeSparseTerms(weightedDtm, 0.9)
 
 dataframeDtm <- data.frame(as.matrix(dtm))
 dataframeWeightedDtm <- data.frame(as.matrix(weightedDtm))
@@ -116,6 +116,16 @@ dataframeDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")
 dataframeWeightedDtm_train$topic <- dataframe$topic[which(dataframe$train_test == "TRAIN")]
 dataframeWeightedDtm_test$topic <- dataframe$topic[which(dataframe$train_test == "TEST")]
 
+
+# SVM
+ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
+
+set.seed(100)
+svm.tfidf.linear  <- train(topic ~ . , data=dataframeWeightedDtm_train, trControl = ctrl, method = "svmLinear")
+
+set.seed(100)
+svm.tfidf.radial  <- train(topic ~ . , data=dataframeWeightedDtm_train, trControl = ctrl, method = "svmRadial")
+
 svm.tfidf.linear.predict <- predict(svm.tfidf.linear,newdata = dataframeWeightedDtm_test)
 svm.tfidf.radial.predict <- predict(svm.tfidf.radial,newdata = dataframeWeightedDtm_test)
 
@@ -124,14 +134,6 @@ svm.tfidf.radial
 
 #dataframe2 <- data.frame(as.matrix(weightedDtm))
 #dataframe2$topic <- dataframe$topic
-
-ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
-
-set.seed(100)
-svm.tfidf.linear  <- train(topic ~ . , data=dataframeWeightedDtm_train, trControl = ctrl, method = "svmLinear")
-
-set.seed(100)
-svm.tfidf.radial  <- train(topic ~ . , data=dataframeWeightedDtm_train, trControl = ctrl, method = "svmRadial")
 
 # get subset corpus of train documents
 vc_p_train <- tm_filter(vc_p, FUN = function(x){meta(x)[["lewissplit"]] == "TRAIN"})
