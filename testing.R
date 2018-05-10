@@ -320,49 +320,33 @@ svmTfidfLinearWheat  <- train(wheat ~ . , data=dataframeWeightedDtmTrain, trCont
 svmTfidfLinearShip  <- train(ship ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "svmLinear")
 svmTfidfLinearCorn  <- train(corn ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "svmLinear")
 
-svmTfLinearPredictEarn <- predict(svmTfLinearEarn, newdata = dataframeDtmTest)
-svmTfLinearPredictAcq <- predict(svmTfLinearAcq, newdata = dataframeDtmTest)
-svmTfLinearPredictMoneyfx <- predict(svmTfLinearMoneyfx, newdata = dataframeDtmTest)
-svmTfLinearPredictCrude <- predict(svmTfLinearCrude, newdata = dataframeDtmTest)
-svmTfLinearPredictGrain <- predict(svmTfLinearGrain, newdata = dataframeDtmTest)
-svmTfLinearPredictTrade <- predict(svmTfLinearTrade, newdata = dataframeDtmTest)
-svmTfLinearPredictInterest <- predict(svmTfLinearInterest, newdata = dataframeDtmTest)
-svmTfLinearPredictWheat <- predict(svmTfLinearWheat, newdata = dataframeDtmTest)
-svmTfLinearPredictShip <- predict(svmTfLinearShip, newdata = dataframeDtmTest)
-svmTfLinearPredictCorn <- predict(svmTfLinearCorn, newdata = dataframeDtmTest)
+svmTfPredictions = list()
+svmTfPredictions[["earn"]] <- predict(svmTfLinearEarn, newdata = dataframeDtmTest)
+svmTfPredictions[["acq"]] <- predict(svmTfLinearAcq, newdata = dataframeDtmTest)
+svmTfPredictions[["moneyfx"]] <- predict(svmTfLinearMoneyfx, newdata = dataframeDtmTest)
+svmTfPredictions[["crude"]] <- predict(svmTfLinearCrude, newdata = dataframeDtmTest)
+svmTfPredictions[["grain"]] <- predict(svmTfLinearGrain, newdata = dataframeDtmTest)
+svmTfPredictions[["trade"]] <- predict(svmTfLinearTrade, newdata = dataframeDtmTest)
+svmTfPredictions[["interest"]] <- predict(svmTfLinearInterest, newdata = dataframeDtmTest)
+svmTfPredictions[["wheat"]] <- predict(svmTfLinearWheat, newdata = dataframeDtmTest)
+svmTfPredictions[["ship"]] <- predict(svmTfLinearShip, newdata = dataframeDtmTest)
+svmTfPredictions[["corn"]] <- predict(svmTfLinearCorn, newdata = dataframeDtmTest)
 
-svmTfidfLinearPredictEarn <- predict(svmTfidfLinearEarn, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictAcq <- predict(svmTfidfLinearAcq, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictMoneyfx <- predict(svmTfidfLinearMoneyfx, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictCrude <- predict(svmTfidfLinearCrude, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictGrain <- predict(svmTfidfLinearGrain, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictTrade <- predict(svmTfidfLinearTrade, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictInterest <- predict(svmTfidfLinearInterest, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictWheat <- predict(svmTfidfLinearWheat, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictShip <- predict(svmTfidfLinearShip, newdata = dataframeWeightedDtmTest)
-svmTfidfLinearPredictCorn <- predict(svmTfidfLinearCorn, newdata = dataframeWeightedDtmTest)
+svmTfLinearResults <- createResultsDF(svmTfPredictions);
 
-svmTfLinearEarn
-svmTfLinearAcq
-svmTfLinearMoneyfx
-svmTfLinearCrude
-svmTfLinearGrain
-svmTfLinearTrade
-svmTfLinearInterest
-svmTfLinearWheat
-svmTfLinearShip
-svmTfLinearCorn
+svmTfidfPredictions = list()
+svmTfidfPredictions[["earn"]] <- predict(svmTfidfLinearEarn, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["acq"]] <- predict(svmTfidfLinearAcq, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["moneyfx"]] <- predict(svmTfidfLinearMoneyfx, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["crude"]] <- predict(svmTfidfLinearCrude, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["grain"]] <- predict(svmTfidfLinearGrain, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["trade"]] <- predict(svmTfidfLinearTrade, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["interest"]] <- predict(svmTfidfLinearInterest, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["wheat"]] <- predict(svmTfidfLinearWheat, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["ship"]] <- predict(svmTfidfLinearShip, newdata = dataframeWeightedDtmTest)
+svmTfidfPredictions[["corn"]] <- predict(svmTfidfLinearCorn, newdata = dataframeWeightedDtmTest)
 
-svmTfidfLinearEarn
-svmTfidfLinearAcq
-svmTfidfLinearMoneyfx
-svmTfidfLinearCrude
-svmTfidfLinearGrain
-svmTfidfLinearTrade
-svmTfidfLinearInterest
-svmTfidfLinearWheat
-svmTfidfLinearShip
-svmTfidfLinearCorn
+svmTfidfLinearResults <- createResultsDF(svmTfidfPredictions);
 
 # Decision Tree
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
