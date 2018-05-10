@@ -115,8 +115,8 @@ dtm <- DocumentTermMatrix(corpus)
 weightedDtm <- weightTfIdf(dtm)
 
 # remove sparse terms
-dtm <- removeSparseTerms(dtm, 0.98)
-weightedDtm <- removeSparseTerms(weightedDtm, 0.98)
+dtm <- removeSparseTerms(dtm, 0.97)
+weightedDtm <- removeSparseTerms(weightedDtm, 0.97)
 
 # Document Term Matrix to dataframe conversion
 dataframeDtm <- data.frame(as.matrix(dtm))
