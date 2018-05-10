@@ -221,10 +221,8 @@ knnTfidf <- train(topic ~ ., data = dataframeWeightedDtmTrain, method = "knn", t
 knnPredict <- predict(knnTf, newdata = dataframeDtmTest)
 knnTfidfPredict <- predict(knnTfidf, newdata = dataframeWeightedDtmTest)
 
-knnTf
-knnTfidf
-
-knnTfModels <- createModelsForTopics(wantedTopics)
+knnTfResults1 <- createResultsDF(as.list(knnPredict));
+knnTfidfResults1 <- createResultsDF(as.list(knnTfidfPredict));
   
 # for 10 specific topic columns
 knnTfEarn <- train(earn ~ ., data = dataframeDtmTrain, method = "knn", trControl = ctrl)
@@ -261,7 +259,7 @@ knnTfPredictions[["wheat"]] <- predict(knnTfWheat, newdata = dataframeDtmTest)
 knnTfPredictions[["ship"]] <- predict(knnTfShip, newdata = dataframeDtmTest)
 knnTfPredictions[["corn"]] <- predict(knnTfCorn, newdata = dataframeDtmTest)
 
-knnTfResults <- createResultsDF(knnTfPredictions);
+knnTfResults2 <- createResultsDF(knnTfPredictions);
 
 knnTfidfPredictions = list()
 knnTfidfPredictions[["earn"]] <- predict(knnTfidfEarn, newdata = dataframeWeightedDtmTest)
@@ -275,7 +273,7 @@ knnTfidfPredictions[["wheat"]] <- predict(knnTfidfWheat, newdata = dataframeWeig
 knnTfidfPredictions[["ship"]] <- predict(knnTfidfShip, newdata = dataframeWeightedDtmTest)
 knnTfidfPredictions[["corn"]] <- predict(knnTfidfCorn, newdata = dataframeWeightedDtmTest)
 
-knnTfidfResults <- createResultsDF(knnTfidfPredictions);
+knnTfidfResults2 <- createResultsDF(knnTfidfPredictions);
 
 # SVM
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
@@ -292,10 +290,10 @@ svmTfidfLinearPredict <- predict(svmTfidfLinear, newdata = dataframeWeightedDtmT
 svmTfRadialPredict <- predict(svmTfRadial, newdata = dataframeDtmTest)
 svmTfidfRadialPredict <- predict(svmTfidfRadial, newdata = dataframeWeightedDtmTest)
 
-svmTfLinear
-svmTfidfLinear
-svmTfRadial
-svmTfidfRadial
+svmTfLinearResults1 <- createResultsDF(as.list(svmTfLinearPredict));
+svmTfidfLinearResults1 <- createResultsDF(as.list(svmTfidfLinearPredict));
+svmTfRadialResults <- createResultsDF(as.list(svmTfRadialPredict));
+svmTfidfRadialResults <- createResultsDF(as.list(svmTfidfRadialPredict));
 
 # for 10 specific topic columns
 svmTfLinearEarn  <- train(earn ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "svmLinear")
@@ -332,7 +330,7 @@ svmTfPredictions[["wheat"]] <- predict(svmTfLinearWheat, newdata = dataframeDtmT
 svmTfPredictions[["ship"]] <- predict(svmTfLinearShip, newdata = dataframeDtmTest)
 svmTfPredictions[["corn"]] <- predict(svmTfLinearCorn, newdata = dataframeDtmTest)
 
-svmTfLinearResults <- createResultsDF(svmTfPredictions);
+svmTfLinearResults2 <- createResultsDF(svmTfPredictions);
 
 svmTfidfPredictions = list()
 svmTfidfPredictions[["earn"]] <- predict(svmTfidfLinearEarn, newdata = dataframeWeightedDtmTest)
@@ -346,7 +344,7 @@ svmTfidfPredictions[["wheat"]] <- predict(svmTfidfLinearWheat, newdata = datafra
 svmTfidfPredictions[["ship"]] <- predict(svmTfidfLinearShip, newdata = dataframeWeightedDtmTest)
 svmTfidfPredictions[["corn"]] <- predict(svmTfidfLinearCorn, newdata = dataframeWeightedDtmTest)
 
-svmTfidfLinearResults <- createResultsDF(svmTfidfPredictions);
+svmTfidfLinearResults2 <- createResultsDF(svmTfidfPredictions);
 
 # Decision Tree
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
