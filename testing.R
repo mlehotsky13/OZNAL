@@ -198,8 +198,8 @@ createResultsDF <- function(predictions){
                    F1=double())
   
   for (i in 1:length(predictions)){
-    cm <- confusionMatrix(knnTfPredictions[[i]], dataframeDtmTest[[names(knnTfPredictions)[[i]]]])
-    d <- data.frame(Topic=names(knnTfPredictions)[[i]],
+    cm <- confusionMatrix(predictions[[i]], dataframeDtmTest[[names(predictions)[[i]]]])
+    d <- data.frame(Topic=names(predictions)[[i]],
                     Accuracy=cm$overall[["Accuracy"]], 
                     Precision=precision(as.table(cm)),
                     Recall=recall(as.table(cm)), 
@@ -264,19 +264,18 @@ knnTfPredictions[["corn"]] <- predict(knnTfCorn, newdata = dataframeDtmTest)
 knnTfResults <- createResultsDF(knnTfPredictions);
 
 knnTfidfPredictions = list()
-knnTfidfPredictions[["earn"]] <- predict(knnTfEarn, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["acq"]] <- predict(knnTfAcq, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["moneyfx"]] <- predict(knnTfMoneyfx, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["crude"]] <- predict(knnTfCrude, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["grain"]] <- predict(knnTfGrain, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["trade"]] <- predict(knnTfTrade, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["interest"]] <- predict(knnTfInterest, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["wheat"]] <- predict(knnTfWheat, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["ship"]] <- predict(knnTfShip, newdata = dataframeWeightedDtmTest)
-knnTfidfPredictions[["corn"]] <- predict(knnTfCorn, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["earn"]] <- predict(knnTfidfEarn, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["acq"]] <- predict(knnTfidfAcq, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["moneyfx"]] <- predict(knnTfidfMoneyfx, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["crude"]] <- predict(knnTfidfCrude, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["grain"]] <- predict(knnTfidfGrain, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["trade"]] <- predict(knnTfidfTrade, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["interest"]] <- predict(knnTfidfInterest, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["wheat"]] <- predict(knnTfidfWheat, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["ship"]] <- predict(knnTfidfShip, newdata = dataframeWeightedDtmTest)
+knnTfidfPredictions[["corn"]] <- predict(knnTfidfCorn, newdata = dataframeWeightedDtmTest)
 
 knnTfidfResults <- createResultsDF(knnTfidfPredictions);
-
 
 # SVM
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
