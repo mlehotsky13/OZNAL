@@ -349,15 +349,66 @@ svmTfidfLinearResults2 <- createResultsDF(svmTfidfPredictions);
 # Decision Tree
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 
+# for topic column
 treeTf  <- train(topic ~ . , data = dataframeDtmTrain, method = "rpart", trControl = ctrl )
 treeTfidf  <- train(topic ~ . , data = dataframeWeightedDtmTrain, method = "rpart", trControl = ctrl )
 
 treeTfPredict <- predict(treeTf, newdata = dataframeWeightedDtmTrain)
 treeTfidfPredict <- predict(treeTfidf, newdata = dataframeWeightedDtmTrain)
 
-treeTf
-treeTfidf
+treeTfResults1 <- createResultsDF(treeTfPredict);
+treeTfidfResults1 <- createResultsDF(treeTfidfPredict);
 
+# for 10 specific topic columns
+treeTfEarn  <- train(earn ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfAcq  <- train(acq ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfMoneyfx  <- train(moneyfx ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfCrude  <- train(crude ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfGrain  <- train(grain ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfTrade  <- train(trade ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfInterest  <- train(interest ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfWheat  <- train(wheat ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfShip  <- train(ship ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+treeTfCorn  <- train(corn ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
+
+treeTfidfEarn  <- train(earn ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfAcq  <- train(acq ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfMoneyfx  <- train(moneyfx ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfCrude  <- train(crude ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfGrain  <- train(grain ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfTrade  <- train(trade ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfInterest  <- train(interest ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfWheat  <- train(wheat ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfShip  <- train(ship ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+treeTfidfCorn  <- train(corn ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "rpart")
+
+treeTfPredictions = list()
+treeTfPredictions[["earn"]] <- predict(knnTfEarn, newdata = dataframeDtmTest)
+treeTfPredictions[["acq"]] <- predict(knnTfAcq, newdata = dataframeDtmTest)
+treeTfPredictions[["moneyfx"]] <- predict(knnTfMoneyfx, newdata = dataframeDtmTest)
+treeTfPredictions[["crude"]] <- predict(knnTfCrude, newdata = dataframeDtmTest)
+treeTfPredictions[["grain"]] <- predict(knnTfGrain, newdata = dataframeDtmTest)
+treeTfPredictions[["trade"]] <- predict(knnTfTrade, newdata = dataframeDtmTest)
+treeTfPredictions[["interest"]] <- predict(knnTfInterest, newdata = dataframeDtmTest)
+treeTfPredictions[["wheat"]] <- predict(knnTfWheat, newdata = dataframeDtmTest)
+treeTfPredictions[["ship"]] <- predict(knnTfShip, newdata = dataframeDtmTest)
+treeTfPredictions[["corn"]] <- predict(knnTfCorn, newdata = dataframeDtmTest)
+
+treeTfResults2 <- createResultsDF(treeTfPredictions);
+
+treeTfidfPredictions = list()
+treeTfidfPredictions[["earn"]] <- predict(knnTfEarn, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["acq"]] <- predict(knnTfAcq, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["moneyfx"]] <- predict(knnTfMoneyfx, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["crude"]] <- predict(knnTfCrude, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["grain"]] <- predict(knnTfGrain, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["trade"]] <- predict(knnTfTrade, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["interest"]] <- predict(knnTfInterest, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["wheat"]] <- predict(knnTfWheat, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["ship"]] <- predict(knnTfShip, newdata = dataframeWeightedDtmTrain)
+treeTfidfPredictions[["corn"]] <- predict(knnTfCorn, newdata = dataframeWeightedDtmTrain)
+
+treeTfidfResults2 <- createResultsDF(treeTfidfPredictions);
 
 # Neural Network
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
@@ -370,5 +421,3 @@ neuralNetTfidfPredict <- predict(neuralNetTfidf, newdata = dataframeWeightedDtmT
 
 neuralNetTf
 neuralNetTfIdf
-
-# SVD, f1 score
