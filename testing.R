@@ -22,7 +22,7 @@ processFile <- function(filepath) {
 }
 
 # going through every .sgm file in give-n directory
-files <- list.files(path="Dataset/reuters21578/test", pattern="*.sgm", full.names=T, recursive=FALSE)
+files <- list.files(path="Dataset/reuters21578", pattern="*.sgm", full.names=T, recursive=FALSE)
 allDocs <- c()
 for (i in 1:length(files)){
   docsOfFile <- processFile(files[i])
@@ -83,13 +83,15 @@ remove(allDocs, cgi, docsOfFile, files, i, ls, topic, cgiDt, lsDt, topicDt, vc, 
 
 # filter documents with wanted topics
 wantedTopics <- list("earn", "acq", "money-fx", "crude", "grain", "trade", "interest", "wheat", "ship", "corn")
-wanted <- tm_filter(vcProcessed, FUN = function(x){length(meta(x)[["topics_cat"]]) > 0})
+#wanted <- tm_filter(vcProcessed, FUN = function(x){length(meta(x)[["topics_cat"]]) > 0})
+# use when doing multiclass classification
+wanted <- tm_filter(vcProcessed, FUN = function(x){length(meta(x)[["topics_cat"]]) == 1})
 wanted <- tm_filter(wanted, FUN = function(x){all(meta(x)[["topics_cat"]] %in% wantedTopics)})
 wanted <- tm_filter(wanted, FUN = function(x){meta(x)[["lewissplit"]] %in% c("TRAIN", "TEST")})
 
 # create dataframe with text contents, topic and indication of presence in train or test set
 dataframe <- data.frame(text=unlist(sapply(wanted, `[`, "content")),
-                        topic=unlist(sapply(wanted, meta, "topics_cat")),
+                        topic=as.factor(unlist(sapply(wanted, meta, "topics_cat"))),
                         train_test=(sapply(wanted, meta, "lewissplit")),
                         stringsAsFactors=F)
 
@@ -211,6 +213,40 @@ createResultsDF <- function(predictions){
   return(df);
 }
 
+createResultsDF2 <- function(testDf, prediction, topics){
+  
+  df <- data.frame(Topic=character(),
+                   Accuracy=double(),
+                   Precision=double(),
+                   Recall=double(),
+                   F1=double())
+  
+  cm <- confusionMatrix(
+    factor(prediction, levels=topics),
+    factor(testDf$topic, levels=topics)
+  )
+  
+  for (i in 1:length(topics)){
+    prec <- cm$table[i,i]/sum(cm$table[i,])
+    rec <- cm$table[i,i]/sum(cm$table[, i])
+    
+    d <- data.frame(Topic=topics[[i]],
+                    Accuracy=sum(diag(cm$table))/sum(cm$table),
+                    # Precision: tp/(tp+fp):
+                    Precision=prec,
+                    # Recall: tp/(tp + fn):
+                    Recall=rec,
+                    # F-Score: 2 * precision * recall /(precision + recall):
+                    F1=2 * prec * rec / (prec + rec));
+    
+    d[is.na(d)] <- 0
+    
+    df <- rbind(df, d);
+  }
+  
+  return(df);
+}
+
 #KNN
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 
@@ -221,9 +257,9 @@ knnTfidf <- train(topic ~ ., data = dataframeWeightedDtmTrain, method = "knn", t
 knnPredict <- predict(knnTf, newdata = dataframeDtmTest)
 knnTfidfPredict <- predict(knnTfidf, newdata = dataframeWeightedDtmTest)
 
-knnTfResults1 <- createResultsDF(as.list(knnPredict));
-knnTfidfResults1 <- createResultsDF(as.list(knnTfidfPredict));
-  
+knnTfResults1 <- createResultsDF2(dataframeDtmTest, knnPredict, wantedTopics);
+knnTfidfResults1 <- createResultsDF2(dataframeWeightedDtmTest, knnTfidfPredict, wantedTopics);
+
 # for 10 specific topic columns
 knnTfEarn <- train(earn ~ ., data = dataframeDtmTrain, method = "knn", trControl = ctrl)
 knnTfAcq <- train(acq ~ ., data = dataframeDtmTrain, method = "knn", trControl = ctrl)
@@ -282,18 +318,11 @@ ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 svmTfLinear  <- train(topic ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "svmLinear")
 svmTfidfLinear  <- train(topic ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "svmLinear")
 
-svmTfRadial  <- train(topic ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "svmRadial")
-svmTfidfRadial  <- train(topic ~ . , data=dataframeWeightedDtmTrain, trControl = ctrl, method = "svmRadial")
-
 svmTfLinearPredict <- predict(svmTfLinear, newdata = dataframeDtmTest)
 svmTfidfLinearPredict <- predict(svmTfidfLinear, newdata = dataframeWeightedDtmTest)
-svmTfRadialPredict <- predict(svmTfRadial, newdata = dataframeDtmTest)
-svmTfidfRadialPredict <- predict(svmTfidfRadial, newdata = dataframeWeightedDtmTest)
 
-svmTfLinearResults1 <- createResultsDF(as.list(svmTfLinearPredict));
-svmTfidfLinearResults1 <- createResultsDF(as.list(svmTfidfLinearPredict));
-svmTfRadialResults <- createResultsDF(as.list(svmTfRadialPredict));
-svmTfidfRadialResults <- createResultsDF(as.list(svmTfidfRadialPredict));
+svmTfLinearResults1 <- createResultsDF2(dataframeDtmTest, svmTfLinearPredict, wantedTopics);
+svmTfidfLinearResults1 <- createResultsDF2(dataframeWeightedDtmTest, svmTfidfLinearPredict, wantedTopics);
 
 # for 10 specific topic columns
 svmTfLinearEarn  <- train(earn ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "svmLinear")
@@ -350,14 +379,16 @@ svmTfidfLinearResults2 <- createResultsDF(svmTfidfPredictions);
 ctrl <- trainControl(method="repeatedcv", number = 10, repeats = 3)
 
 # for topic column
-treeTf  <- train(topic ~ . , data = dataframeDtmTrain, method = "rpart", trControl = ctrl )
+treeTf  <- train(topic ~ . , data = dataframeDtmTrain, method = "rpart", trControl = ctrl)
 treeTfidf  <- train(topic ~ . , data = dataframeWeightedDtmTrain, method = "rpart", trControl = ctrl )
 
 treeTfPredict <- predict(treeTf, newdata = dataframeDtmTest)
 treeTfidfPredict <- predict(treeTfidf, newdata = dataframeWeightedDtmTest)
 
-treeTfResults1 <- createResultsDF(treeTfPredict);
-treeTfidfResults1 <- createResultsDF(treeTfidfPredict);
+treeTfResults1 <- createResultsDF2(dataframeDtmTest, treeTfPredict, wantedTopics);
+treeTfidfResults1 <- createResultsDF2(dataframeWeightedDtmTest, treeTfidfPredict, wantedTopics);
+
+write.table(treeTfResults1, row.names=FALSE, append = TRUE, "Results/results.txt", sep="\t")
 
 # for 10 specific topic columns
 treeTfEarn  <- train(earn ~ . , data=dataframeDtmTrain, trControl = ctrl, method = "rpart")
